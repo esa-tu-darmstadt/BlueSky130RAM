@@ -1,17 +1,21 @@
 package TestsMainTest;
     import StmtFSM :: *;
     import TestHelper :: *;
-    import OpenRAMWrappers::*;
     import FIFO::*;
     import SpecialFIFOs::*;
+
+    `ifdef OPENRAM
+    import OpenRAMWrappers::*;
     import OpenRAM::*;
     import WrapBRAMAsOpenRAM::*;
     import BRAM::*;
     import Vector::*;
 
+    `ifdef SRAM22
     import SRAM22_lowlevel_Wrappers::*;
     import SRAM22Wrappers::*;
     import SRAM22::*;
+    `endif
 
     (* synthesize *)
     module [Module] mkTestsMainTest(TestHelper::TestHandler);

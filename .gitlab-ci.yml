@@ -14,6 +14,7 @@ before_script:
   - export LC_ALL=C
   - export PATH="/opt/cad/mentor/2020-21/RHELx86/QUESTA-CORE-PRIME_2020.4/questasim/bin:${PATH}"
   - export MGLS_LICENSE_FILE=/opt/cad/keys/mentor
+  - yum -y install git make wget bzip2 redhat-lsb-core gcc libX11 libXext libXft python3
 
 
 deps:
