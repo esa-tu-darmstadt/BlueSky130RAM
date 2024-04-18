@@ -1,0 +1,45 @@
+image: markussh/bsv_riscv-gcc:latest
+
+variables:
+  XILINX_VIVADO: "/opt/cad/xilinx/vitis/Vivado/2020.2"
+  XILINX_LICENSE_FILE: "/opt/cad/keys/xilinx"
+
+stages:
+  - deps
+  - test
+
+before_script:
+  # Vivado
+  - export PATH="${XILINX_VIVADO}/bin:${PATH}:/opt/bsc/bin"
+  - export LC_ALL=C
+  - export PATH="/opt/cad/mentor/2020-21/RHELx86/QUESTA-CORE-PRIME_2020.4/questasim/bin:${PATH}"
+  - export MGLS_LICENSE_FILE=/opt/cad/keys/mentor
+
+
+deps:
+  stage: deps
+  script:
+
+  # BSV tools
+  - pushd tests/project
+  - /opt/bsvtools/bsvAdd.py
+  - pushd libraries
+  - git clone https://github.com/esa-tu-darmstadt/BlueLib.git
+  - popd
+  - popd
+  
+  artifacts:
+    paths:
+      - tests/project/.bsv_tools
+      - tests/project/libraries/BlueLib
+
+test_sram22:
+  stage: test
+  script:
+
+  - python3 create_wrappers_openram.py --sram22 tests/sram22/test_instances
+
+  # BSV tools
+  - pushd tests/project
+  - make SIM_TYPE=VERILOG GUARD=0 RAM=SRAM22 AW=6 DW=32 P_R=0 P_W=0 P_RW=1 STRB=4
+  - popd
