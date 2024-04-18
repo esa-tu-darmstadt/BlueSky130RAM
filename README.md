@@ -76,3 +76,15 @@ Additionally, even if no FIFO is requested, the BRAM output is always registered
 For simulation, insert `timescale 1ns / 1ps` into your simulation model.
 
 In case of issues, feedback or willingness to add own contributions, contact @ms.
+
+## Usage (SRAM22)
+
+SRAM22 reuses most OpenRAM code. Call `create_wrappers_openram.py` with the `--sram22` flag and point it to the directory with your macros.
+The interface is similar to OpenRAM, but the typeclass name is different:
+
+
+```
+OpenRAMIfc#(0, 0, 1, <addr_width>, <data_width>, <enable_width>) dut <- mkSRAM22(<add_fifo_buffer>);
+```
+
+Since SRAM22 only supports RW single ported memories, the first three parameters of the interface never change.
