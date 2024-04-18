@@ -1,4 +1,3 @@
-*.v
 *.bo
 Macros.bsv
 Test.bsv
