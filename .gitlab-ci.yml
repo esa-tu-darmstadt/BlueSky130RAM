@@ -41,5 +41,6 @@ test_sram22:
 
   # BSV tools
   - pushd tests/project
+  - ln -s ../../../ libraries/BlueSRAM
   - make SIM_TYPE=VERILOG GUARD=0 RAM=SRAM22 AW=6 DW=32 P_R=0 P_W=0 P_RW=1 STRB=4
   - popd

@@ -1,7 +1,6 @@
 package TestsMainTest;
     import StmtFSM :: *;
     import TestHelper :: *;
-    import TestProj :: *;
     import OpenRAMWrappers::*;
     import FIFO::*;
     import SpecialFIFOs::*;
