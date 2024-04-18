@@ -3,10 +3,13 @@ package TestsMainTest;
     import TestHelper :: *;
     import FIFO::*;
     import SpecialFIFOs::*;
+    import OpenRAMIfc::*;
 
     `ifdef OPENRAM
     import OpenRAMWrappers::*;
     import OpenRAM::*;
+    `endif
+    
     import WrapBRAMAsOpenRAM::*;
     import BRAM::*;
     import Vector::*;
@@ -23,18 +26,34 @@ package TestsMainTest;
     (* synthesize *)
     module [Module] mkTestsMainTest(TestHelper::TestHandler);
 
-        //OpenRAMIfc#(0, 0, 1,  5, 9, 4) dut <- mkOpenRAM(True);
-
         `ifdef GUARDED
             Bool guard = True;
         `else
             Bool guard = False;
         `endif
 
-        `ifdef BRAM
+        `ifdef BRAMDP
             BRAM_Configure cfg = defaultValue ; //declare variable cfg
-            cfg.memorySize = 1024*32 ; //new value for memorySize
-            BRAM2Port#(`ADDR_WIDTH, `DATA_WIDTH) bram <- mkBRAM2Server (cfg) ;
+            cfg.memorySize = 32 ; //new value for memorySize
+            BRAM2Port#(Bit#(`ADDR_WIDTH), Bit#(`DATA_WIDTH)) bram <- mkBRAM2Server (cfg);
+        `endif
+
+        `ifdef BRAMSP
+            BRAM_Configure cfg = defaultValue ; //declare variable cfg
+            cfg.memorySize = 32 ; //new value for memorySize
+            BRAM1Port#(Bit#(`ADDR_WIDTH), Bit#(`DATA_WIDTH)) bram <- mkBRAM1Server (cfg);
+        `endif
+
+        `ifdef BRAMDPBE
+            BRAM_Configure cfg = defaultValue ; //declare variable cfg
+            cfg.memorySize = 32 ; //new value for memorySize
+            BRAM2PortBE#(Bit#(`ADDR_WIDTH), Bit#(`DATA_WIDTH), 4) bram <- mkBRAM2ServerBE (cfg);
+        `endif
+
+        `ifdef BRAMSPBE
+            BRAM_Configure cfg = defaultValue ; //declare variable cfg
+            cfg.memorySize = 32 ; //new value for memorySize
+            BRAM1PortBE#(Bit#(`ADDR_WIDTH), Bit#(`DATA_WIDTH), 4) bram <- mkBRAM1ServerBE (cfg);
         `endif
 
         OpenRAMIfc#(`R_PORTS, `W_PORTS, `RW_PORTS, `ADDR_WIDTH, `DATA_WIDTH, `STROBES) dut
@@ -44,14 +63,22 @@ package TestsMainTest;
         `ifdef OPENRAM
             <- mkOpenRAM(guard)
         `endif
-        `ifdef BRAM
+        `ifdef BRAMDP
             <- mkOpenRamBRAMDP(bram)
+        `endif
+        `ifdef BRAMSP
+            <- mkOpenRamBRAMSP(bram)
+        `endif
+        `ifdef BRAMDPBE
+            <- mkOpenRamBRAMByteEnDP(bram)
+        `endif
+        `ifdef BRAMSPBE
+            <- mkOpenRamBRAMByteEnSP(bram)
         `endif
         ;
 
 
-        //SRAMServerBitEnDualPort#(8192, 128, 32, 8) t22 <- mkSRAMServerBitEnDualPort(True, False);
-        //OpenRAMIfc#(0, 0, 1, 13, 32, 32) dut <- mkOpenRamGF22BitEnDP(t22);
+
 
         Reg#(UInt#(32)) ctr <- mkReg(0);
         Reg#(UInt#(32)) clk_ctr <- mkReg(0);
@@ -67,9 +94,9 @@ package TestsMainTest;
 
         rule rq (ctr <= 'b1111);
             `ifdef TEST_W
-                dut.w[0].request(pack(truncate(ctr)), pack(truncate(ctr)), truncate(32'hffffffff));
+                dut.w[0].request(pack(truncate(ctr)), cExtend(pack(ctr)), pack(replicate(1'b1)));
             `else
-                dut.rw[0].request(pack(truncate(ctr)), pack(truncate(ctr)), truncate(32'hffffffff), True);
+                dut.rw[0].request(pack(truncate(ctr)), cExtend(pack(ctr)), pack(replicate(1'b1)), True);
             `endif
         endrule
 

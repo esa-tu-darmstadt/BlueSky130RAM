@@ -46,6 +46,30 @@ endif
 ifeq ($(RAM),GF22)
 	EXTRA_FLAGS+=-D GF22=1
 endif
+ifeq ($(RAM),BRAMDP)
+	EXTRA_FLAGS+=-D BRAMDP=1
+endif
+ifeq ($(RAM),BRAMSP)
+	EXTRA_FLAGS+=-D BRAMSP=1
+endif
+ifeq ($(RAM),BRAMDPBE)
+	EXTRA_FLAGS+=-D BRAMDPBE=1
+endif
+ifeq ($(RAM),BRAMSPBE)
+	EXTRA_FLAGS+=-D BRAMSPBE=1
+endif
+ifeq ($(RAM),GF22DP)
+	EXTRA_FLAGS+=-D GF22DP=1 -D GF22=1
+endif
+ifeq ($(RAM),GF22DPBE)
+	EXTRA_FLAGS+=-D GF22DPBE=1 -D GF22=1
+endif
+ifeq ($(RAM),GF22SP)
+	EXTRA_FLAGS+=-D GF22SP=1 -D GF22=1
+endif
+ifeq ($(RAM),GF22SPBE)
+	EXTRA_FLAGS+=-D GF22SPBE=1 -D GF22=1
+endif
 
 ifeq ($(TEST_W),1)
 	EXTRA_FLAGS+=-D TEST_W=1
@@ -54,7 +78,7 @@ ifeq ($(TEST_R),1)
 	EXTRA_FLAGS+=-D TEST_R=1
 endif
 
-EXTRA_FLAGS+=-D ADDR_WIDTH=$(AW) -D DATA_WIDTH=$(DW) -D R_PORTS=$(P_R) -D W_PORTS=$(P_W) -D RW_PORTS=$(P_RW) -D STROBES=$(STRB)
+EXTRA_FLAGS+=-D ADDR_WIDTH=$(AW) -D DATA_WIDTH=$(DW) -D R_PORTS=$(P_R) -D W_PORTS=$(P_W) -D RW_PORTS=$(P_RW) -D STROBES=$(STRB) -D WORDS=$(WORDS) -D BITLINE=$(BITLINE) -D MUX=$(MUX)
 
 
 # Comment the following line if -O3 should be used during compilation
