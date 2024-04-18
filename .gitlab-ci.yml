@@ -46,4 +46,18 @@ test_sram22:
   - python3 create_wrappers_openram.py --sram22 ../../../sram22/test_instances
   - popd
   - make SIM_TYPE=VERILOG GUARD=0 RAM=SRAM22 AW=6 DW=32 P_R=0 P_W=0 P_RW=1 STRB=4
+  - make SIM_TYPE=VERILOG GUARD=1 RAM=SRAM22 AW=6 DW=32 P_R=0 P_W=0 P_RW=1 STRB=4
+  - popd
+
+test_openram:
+  stage: test
+  script:
+
+  - pushd tests/project
+  - mkdir -p libraries/bluesram/
+  - cp ../../* libraries/bluesram/ -r || true
+  - pushd libraries/bluesram
+  - python3 create_wrappers_openram.py ../../../openram/test_instances
+  - popd
+  - make SIM_TYPE=VERILOG GUARD=0 RAM=OPENRAM AW=5 DW=9 P_R=0 P_W=0 P_RW=1 STRB=4
   - popd
