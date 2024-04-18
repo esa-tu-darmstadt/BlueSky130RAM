@@ -17,6 +17,8 @@ package TestsMainTest;
     import SRAM22::*;
     `endif
 
+    import Assertions :: *;
+
     (* synthesize *)
     module [Module] mkTestsMainTest(TestHelper::TestHandler);
 
@@ -93,7 +95,8 @@ package TestsMainTest;
 
         rule end_sim (ctr == 1000);
             for (Integer i = 0; i <= 9; i=i+1) begin
-                if(results[i] != fromInteger(i)) $display("FUCK");
+                let err_msg = $format("A read value was wrong");
+                assertEquals(results[i], fromInteger(i), err_msg);
             end
             $finish();
         endrule
