@@ -47,6 +47,13 @@ ifeq ($(RAM),GF22)
 	EXTRA_FLAGS+=-D GF22=1
 endif
 
+ifeq ($(TEST_W),1)
+	EXTRA_FLAGS+=-D TEST_W=1
+endif
+ifeq ($(TEST_R),1)
+	EXTRA_FLAGS+=-D TEST_R=1
+endif
+
 EXTRA_FLAGS+=-D ADDR_WIDTH=$(AW) -D DATA_WIDTH=$(DW) -D R_PORTS=$(P_R) -D W_PORTS=$(P_W) -D RW_PORTS=$(P_RW) -D STROBES=$(STRB)
 
 

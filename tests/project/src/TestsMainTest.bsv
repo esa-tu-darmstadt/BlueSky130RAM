@@ -18,6 +18,7 @@ package TestsMainTest;
     `endif
 
     import Assertions :: *;
+    import BUtils::*;
 
     (* synthesize *)
     module [Module] mkTestsMainTest(TestHelper::TestHandler);
@@ -88,7 +89,7 @@ package TestsMainTest;
 
         rule rq_rs if (clk_ctr > 500 || !guard);
             let v <- dut.rw[0].response();
-            results[ctr_res] <= v;
+            results[ctr_res] <= cExtend(v);
             ctr_res <= ctr_res + 1;
             $display("[%t] resp: ", $time, v);
         endrule
