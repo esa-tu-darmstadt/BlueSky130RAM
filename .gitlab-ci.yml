@@ -23,6 +23,7 @@ deps:
   # BSV tools
   - pushd tests/project
   - /opt/bsvtools/bsvAdd.py
+  - mkdir -p libraries/
   - pushd libraries
   - git clone https://github.com/esa-tu-darmstadt/BlueLib.git
   - popd
@@ -37,10 +38,11 @@ test_sram22:
   stage: test
   script:
 
-  - python3 create_wrappers_openram.py --sram22 tests/sram22/test_instances
-
-  # BSV tools
   - pushd tests/project
-  - ln -s ../../../ libraries/BlueSRAM
+  - mkdir -p libraries/bluesram/
+  - cp ../../* libraries/bluesram/ -r || true
+  - pushd libraries/bluesram
+  - python3 create_wrappers_openram.py --sram22 ../../../sram22/test_instances
+  - popd
   - make SIM_TYPE=VERILOG GUARD=0 RAM=SRAM22 AW=6 DW=32 P_R=0 P_W=0 P_RW=1 STRB=4
   - popd
