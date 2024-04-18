@@ -88,7 +88,12 @@ package TestsMainTest;
         Reg#(UInt#(8)) ctr_res <- mkReg(0);
 
         rule rq_rs if (clk_ctr > 500 || !guard);
-            let v <- dut.rw[0].response();
+            let v <- 
+            `ifdef TEST_R
+                dut.r[0].response();
+            `else
+                dut.rw[0].response();
+            `endif
             results[ctr_res] <= cExtend(v);
             ctr_res <= ctr_res + 1;
             $display("[%t] resp: ", $time, v);
