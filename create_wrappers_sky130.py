@@ -9,10 +9,7 @@ from functools import reduce
 
 def collect_macro_names(path, sram22):
     # get all subdirectories in openram output (also macro names)
-    if not sram22:
-        subdirs = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
-    else:
-        subdirs = [x.replace(".v", "") for x in os.listdir(path) if os.path.isfile(os.path.join(path, x)) and ".v" in x]
+    subdirs = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
 
     # return those collected macro names
     return subdirs
@@ -23,10 +20,7 @@ def collect_macro_info(path, names, sram22):
 
     for n in names:
         # get vlog file name
-        if not sram22:
-            vlog_file = os.path.join(path, n, n+".v")
-        else:
-            vlog_file = os.path.join(path, n + ".v")
+        vlog_file = os.path.join(path, n, n+".v")
 
         abs_vlog = os.path.abspath(vlog_file)
         # read simulation model - array of lines
