@@ -43,7 +43,7 @@ test_sram22:
   - mkdir -p libraries/bluesram/
   - cp ../../* libraries/bluesram/ -r || true
   - pushd libraries/bluesram
-  - python3 create_wrappers_openram.py --sram22 ../../../sram22/test_instances
+  - python3 create_wrappers_sky130.py --sram22 ../../../sram22/test_instances
   - popd
   - make SIM_TYPE=VERILOG GUARD=0 RAM=SRAM22 AW=6 DW=32 P_R=0 P_W=0 P_RW=1 STRB=4
   - make SIM_TYPE=VERILOG GUARD=1 RAM=SRAM22 AW=6 DW=32 P_R=0 P_W=0 P_RW=1 STRB=4
@@ -57,7 +57,7 @@ test_openram:
   - mkdir -p libraries/bluesram/
   - cp ../../* libraries/bluesram/ -r || true
   - pushd libraries/bluesram
-  - python3 create_wrappers_openram.py ../../../openram/test_instances
+  - python3 create_wrappers_sky130.py ../../../openram/test_instances
   - popd
   - make SIM_TYPE=VERILOG GUARD=0 RAM=OPENRAM AW=10 DW=8 P_R=1 P_W=1 P_RW=0 STRB=0 TEST_W=1 TEST_R=1
   - make SIM_TYPE=VERILOG GUARD=1 RAM=OPENRAM AW=10 DW=8 P_R=1 P_W=1 P_RW=0 STRB=0 TEST_W=1 TEST_R=1
@@ -92,7 +92,7 @@ test_BRAMDP:
   - mkdir -p libraries/bluesram/
   - cp ../../* libraries/bluesram/ -r || true
   - pushd libraries/bluesram
-  - python3 create_wrappers_openram.py ../../../openram/test_instances
+  - python3 create_wrappers_sky130.py ../../../openram/test_instances
   - popd
   - make SIM_TYPE=VERILOG GUARD=0 RAM=BRAMDP AW=10 DW=8 P_R=1 P_W=1 P_RW=0 STRB=0 TEST_W=1 TEST_R=1
   - make SIM_TYPE=VERILOG GUARD=1 RAM=BRAMDP AW=10 DW=8 P_R=1 P_W=1 P_RW=0 STRB=0 TEST_W=1 TEST_R=1
@@ -110,7 +110,7 @@ test_BRAMSP:
   - mkdir -p libraries/bluesram/
   - cp ../../* libraries/bluesram/ -r || true
   - pushd libraries/bluesram
-  - python3 create_wrappers_openram.py ../../../openram/test_instances
+  - python3 create_wrappers_sky130.py ../../../openram/test_instances
   - popd
   
   - make SIM_TYPE=VERILOG GUARD=0 RAM=BRAMSP AW=5 DW=9 P_R=0 P_W=0 P_RW=1 STRB=0
@@ -126,7 +126,7 @@ test_BRAMDPBE:
   - mkdir -p libraries/bluesram/
   - cp ../../* libraries/bluesram/ -r || true
   - pushd libraries/bluesram
-  - python3 create_wrappers_openram.py ../../../openram/test_instances
+  - python3 create_wrappers_sky130.py ../../../openram/test_instances
   - popd
   - make SIM_TYPE=VERILOG GUARD=0 RAM=BRAMDPBE AW=10 DW=32 P_R=1 P_W=1 P_RW=0 STRB=4 TEST_W=1 TEST_R=1
   - make SIM_TYPE=VERILOG GUARD=1 RAM=BRAMDPBE AW=10 DW=32 P_R=1 P_W=1 P_RW=0 STRB=4 TEST_W=1 TEST_R=1
@@ -144,7 +144,7 @@ test_BRAMSPBE:
   - mkdir -p libraries/bluesram/
   - cp ../../* libraries/bluesram/ -r || true
   - pushd libraries/bluesram
-  - python3 create_wrappers_openram.py ../../../openram/test_instances
+  - python3 create_wrappers_sky130.py ../../../openram/test_instances
   - popd
   
   - make SIM_TYPE=VERILOG GUARD=0 RAM=BRAMSPBE AW=5 DW=32 P_R=0 P_W=0 P_RW=1 STRB=4
