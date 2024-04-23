@@ -130,4 +130,4 @@ if __name__ == "__main__":
     # get vlog names
     vlog_files = map(lambda a: a.vlog, macros)
     vlog_str = reduce(lambda a, b: a+" "+b, vlog_files)
-    open("openram.mk" if not args.sram22 else "sram22.mk", "w").write("C_FILES += " + vlog_str)
+    open("openram.files" if not args.sram22 else "sram22.files", "w").write("C_FILES += " + vlog_str)
