@@ -93,13 +93,13 @@ def create_rw_port(macro, macro_port_num, type_port_num, sram22, dffram):
 # return the definition for an interface port of type R
 # macro_port refers to the port number in the macro
 # type_port refers to the port number of this type
-def create_r_port(macro, macro_port_num, type_port_num):
+def create_r_port(macro, macro_port_num, type_port_num, dffram):
     logic = f"""
     // handling of enable signals for macro
     Wire#(Bool) got_rq_{macro_port_num} <- mkDWire(False);
     rule dummy_request{macro_port_num} if (!got_rq_{macro_port_num});
         sram.r{type_port_num}.ena(True); // active low, disabled
-        sram.r{type_port_num}.request(?); // don't care, has no effect as ena is disabled
+        sram.r{type_port_num}.request({"?" if not dffram else "0"}); // don't care, has no effect as ena is disabled
     endrule
 
     // adding guards for reading - only allow result method if result is available
@@ -136,7 +136,7 @@ def create_r_port(macro, macro_port_num, type_port_num):
         method Action request(Bit#({macro.addr_width}) addr) if (!guard_rq_buffer_rs || rd_rq_cnt_{macro_port_num}[0] < 3);
             got_rq_{macro_port_num} <= True;
             sram.r{type_port_num}.request(addr);
-            sram.r{type_port_num}.ena(False);
+            sram.r{type_port_num}.ena({"True" if dffram else "False"});
         endmethod
         method ActionValue#(Bit#({macro.data_width})) response if (rs_buffering_valid_{macro_port_num} || guard_rq_buffer_rs);
             if (guard_rq_buffer_rs) begin
@@ -188,7 +188,7 @@ def create_wrapper(bsvFile, macro, sram22, dffram):
     for n, p in enumerate(macro.ports_w):
         interfaces.append(create_w_port(macro, p, n))
     for n, p in enumerate(macro.ports_r):
-        interfaces.append(create_r_port(macro, p, n))
+        interfaces.append(create_r_port(macro, p, n, dffram))
 
     # produce lowlevel interface
 
