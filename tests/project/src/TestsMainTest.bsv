@@ -20,11 +20,15 @@ package TestsMainTest;
     import SRAM22::*;
     `endif
 
+    `ifdef DFFRAM
+    import DFFRAM::*;
+    `endif
+
     import Assertions :: *;
     import BUtils::*;
 
     (* synthesize *)
-    module [Module] mkTestsMainTest(TestHelper::TestHandler);
+    module [Module] mkTestsMainTest(Empty);
 
         `ifdef GUARDED
             Bool guard = True;
@@ -92,11 +96,11 @@ package TestsMainTest;
 
         rule cnt if (!((ctr >= 200 && ctr < 210))); ctr <= ctr + 1; endrule
 
-        rule rq (ctr <= 'b1111);
+        rule rq (ctr <= 10 && ctr > 0);
             `ifdef TEST_W
-                dut.w[0].request(pack(truncate(ctr)), cExtend(pack(ctr)), pack(replicate(1'b1)));
+                dut.w[0].request(pack(truncate(ctr-1)), cExtend(pack(ctr-1)), pack(replicate(1'b1)));
             `else
-                dut.rw[0].request(pack(truncate(ctr)), cExtend(pack(ctr)), pack(replicate(1'b1)), True);
+                dut.rw[0].request(pack(truncate(ctr-1)), cExtend(pack(ctr-1)), pack(replicate(1'b1)), True);
             `endif
         endrule
 
@@ -121,7 +125,7 @@ package TestsMainTest;
             `else
                 dut.rw[0].response();
             `endif
-            results[ctr_res] <= cExtend(v);
+            if (ctr_res <= 9) results[ctr_res] <= cExtend(v);
             ctr_res <= ctr_res + 1;
             $display("[%t] resp: ", $time, v);
         endrule

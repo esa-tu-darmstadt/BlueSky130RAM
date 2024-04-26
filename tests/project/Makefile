@@ -70,6 +70,9 @@ endif
 ifeq ($(RAM),GF22SPBE)
 	EXTRA_FLAGS+=-D GF22SPBE=1 -D GF22=1
 endif
+ifeq ($(RAM),DFFRAM)
+	EXTRA_FLAGS+=-D DFFRAM=1
+endif
 
 ifeq ($(TEST_W),1)
 	EXTRA_FLAGS+=-D TEST_W=1
@@ -78,7 +81,7 @@ ifeq ($(TEST_R),1)
 	EXTRA_FLAGS+=-D TEST_R=1
 endif
 
-EXTRA_FLAGS+=-D ADDR_WIDTH=$(AW) -D DATA_WIDTH=$(DW) -D R_PORTS=$(P_R) -D W_PORTS=$(P_W) -D RW_PORTS=$(P_RW) -D STROBES=$(STRB) -D WORDS=$(WORDS) -D BITLINE=$(BITLINE) -D MUX=$(MUX)
+EXTRA_FLAGS+=-D ADDR_WIDTH=$(AW) -D DATA_WIDTH=$(DW) -D R_PORTS=$(P_R) -D W_PORTS=$(P_W) -D RW_PORTS=$(P_RW) -D STROBES=$(STRB) -D WORDS=$(WORDS) -D BITLINE=$(BITLINE) -D MUX=$(MUX) -D LATCHED=$(LATCHED)
 
 
 # Comment the following line if -O3 should be used during compilation

@@ -11,22 +11,9 @@ package Testbench;
 
     (* synthesize *)
     module [Module] mkTestbench();
-        Vector#(TestAmount, TestHandler) testVec;
+        Vector#(TestAmount, Empty) testVec;
         testVec[0] <- `TESTNAME ();
 
-        Reg#(UInt#(32)) testCounter <- mkReg(0);
-        Stmt s = {
-            seq
-                for(testCounter <= 0;
-                    testCounter < fromInteger(valueOf(TestAmount));
-                    testCounter <= testCounter + 1)
-                seq
-                    testVec[testCounter].go();
-                    await(testVec[testCounter].done());
-                endseq
-            endseq
-        };
-        mkAutoFSM(s);
     endmodule
 
 endpackage

@@ -6,30 +6,30 @@ class IfcDefinition:
     logic_implementation: str
 
 # write preamble information to the lowlevel wrapper file
-def write_port_interfaces(bsvFile, sram22):
+def write_port_interfaces(bsvFile, sram22, dffram):
     bsvFile.write(f"""
-import {"OpenRAM" if not sram22 else "SRAM22"}_lowlevel_Wrappers::*;
+import {"SRAM22" if sram22 else "DFFRAM" if dffram else "OpenRAM"}_lowlevel_Wrappers::*;
 import Vector::*;
 import FIFO::*;
 import SpecialFIFOs::*;
 import OpenRAMIfc::*;
 
 export OpenRAMIfc::*;
-export {"OpenRAM" if not sram22 else "SRAM22"}Wrappers::*;
+export {"SRAM22" if sram22 else "DFFRAM" if dffram else "OpenRAM"}Wrappers::*;
 
 """)
 
 # return the definition for an interface port of type RW
 # macro_port refers to the port number in the macro
 # type_port refers to the port number of this type
-def create_rw_port(macro, macro_port_num, type_port_num, sram22):
+def create_rw_port(macro, macro_port_num, type_port_num, sram22, dffram):
     logic = f"""
     // handling of enable signals for macro
     Wire#(Bool) got_rq_{macro_port_num} <- mkDWire(False);
     // if no request is sent, we must send dummy values to statisfy always_enabled
     rule dummy_request{macro_port_num} if (!got_rq_{macro_port_num});
-        {"// " if sram22 else ""}sram.rw{type_port_num}.ena(True); // active low, disabled
-        sram.rw{type_port_num}.request(?, ?, ?, False); // don't care, has no effect as ena is disabled
+        {"// " if sram22 else ""}sram.rw{type_port_num}.ena({"True"}); // active low, disabled
+        sram.rw{type_port_num}.request({"?" if not dffram else "0"}, ?, {"?, False" if not dffram else "pack(replicate(False))"}); // don't care, has no effect as ena is disabled
     endrule
 
     // adding guards for reading - only allow result method if result is available
@@ -69,8 +69,8 @@ def create_rw_port(macro, macro_port_num, type_port_num, sram22):
             if (!guard_rq_buffer_rs || rd_rq_cnt_{macro_port_num}[0] < 3); // if guarded, stall when no further requests could be handled without loosing data
             got_rq_{macro_port_num} <= True; // stall dummy request logic
             // send request
-            sram.rw{type_port_num}.request(addr, din, mask, {"!" if not sram22 else ""}write_en);
-            {"// " if sram22 else ""}sram.rw{type_port_num}.ena(False);
+            sram.rw{type_port_num}.request(addr, din, {"mask," if not dffram else "write_en ? mask : 0"} {"!" if not sram22 and not dffram else ""}{"write_en" if not dffram else ""});
+            {"// " if sram22 else ""}sram.rw{type_port_num}.ena({"True" if dffram else "False"});
             if (!write_en) got_rq_rd_{macro_port_num} <= True; // notify shift register of read request
         endmethod
         method ActionValue#(Bit#({macro.data_width})) response 
@@ -176,11 +176,15 @@ def create_w_port(macro, macro_port_num, type_port_num):
 """
     return IfcDefinition(interface_implementation=impl, logic_implementation=logic)
 
-def create_wrapper(bsvFile, macro, sram22):
+def create_wrapper(bsvFile, macro, sram22, dffram):
+    if dffram:
+        macro.data_width = "datawidth"
+        macro.wmask_width = "databytes"
+
     interfaces = []
     # emit port information
     for n, p in enumerate(macro.ports_rw):
-        interfaces.append(create_rw_port(macro, p, n, sram22))
+        interfaces.append(create_rw_port(macro, p, n, sram22, dffram))
     for n, p in enumerate(macro.ports_w):
         interfaces.append(create_w_port(macro, p, n))
     for n, p in enumerate(macro.ports_r):
@@ -189,9 +193,17 @@ def create_wrapper(bsvFile, macro, sram22):
     # produce lowlevel interface
 
     # write implementation
-    bsvFile.write(f"\nmodule mk_{macro.name}#(Bool guard_rq_buffer_rs) (OpenRAMIfc#({len(macro.ports_r)}, {len(macro.ports_w)}, {len(macro.ports_rw)}, {macro.addr_width}, {macro.data_width}, {macro.wmask_width}));\n")
+    datawidth = "datawidth" if dffram else macro.data_width
+    databytes = "databytes" if dffram else macro.wmask_width
+    params = ", Bool latches" if dffram else ""
+    bsvFile.write(f"\nmodule mk_{macro.name}#(Bool guard_rq_buffer_rs{params}) (OpenRAMIfc#({len(macro.ports_r)}, {len(macro.ports_w)}, {len(macro.ports_rw)}, {macro.addr_width}, {datawidth}, {databytes}))")
+    if dffram:
+        bsvFile.write(" provisos(\n    Mul#(8, databytes, datawidth)\n)")
+    bsvFile.write(";\n")
 
-    bsvFile.write(f"    let sram <- mk_{macro.name}_ll();\n")
+    params = "latches" if dffram else ""
+    iface_name = "let" if not dffram else f"OR_{macro.name}_Ifc#(databytes)"
+    bsvFile.write(f"    {iface_name} sram <- mk_{macro.name}_ll({params});\n")
 
     for i in interfaces:
         bsvFile.write(i.logic_implementation)
@@ -210,18 +222,19 @@ def create_wrapper(bsvFile, macro, sram22):
     bsvFile.write("endmodule\n\n\n")
 
 
-def create_wrappers(macros, sram22):
+def create_wrappers(macros, sram22, dffram):
 
-    bsvFile = open("src/OpenRAMWrappers.bsv" if not sram22 else "src/SRAM22Wrappers.bsv", "w")
+    pkgname = "SRAM22Wrappers" if sram22 else "DFFRAMWrappers" if dffram else "OpenRAMWrappers"
+    bsvFile = open(f"src/{pkgname}.bsv", "w")
 
     # header
-    bsvFile.write(f"package OpenRAMWrappers;\n" if not sram22 else f"package SRAM22Wrappers;\n")
+    bsvFile.write(f"package {pkgname};\n")
 
     # write iface info
-    write_port_interfaces(bsvFile, sram22)
+    write_port_interfaces(bsvFile, sram22, dffram)
 
     for macro in macros:
-        create_wrapper(bsvFile, macro, sram22)
+        create_wrapper(bsvFile, macro, sram22, dffram)
         
     # footer
     bsvFile.write(f"endpackage\n")

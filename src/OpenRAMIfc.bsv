@@ -25,6 +25,12 @@ interface LL_RWIfc22#(numeric type addrwidth, numeric type datawidth, numeric ty
     method Bit#(datawidth) response;
 endinterface
 
+interface LL_RWIfcDFF#(numeric type addrwidth, numeric type datawidth, numeric type ena_width);
+    method Action request(Bit#(addrwidth) addr, Bit#(datawidth) din, Bit#(ena_width) mask);
+    method Action ena(Bool en);
+    method Bit#(datawidth) response;
+endinterface
+
 // Interfaces for a single port for higher-level wrappers
 interface RIfc#(numeric type addrwidth, numeric type datawidth);
     method Action request(Bit#(addrwidth) addr);

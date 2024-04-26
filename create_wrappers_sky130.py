@@ -4,6 +4,7 @@ import re
 import bluesram.wrappers_lowlevel_sky130 as ll_wrappers
 import bluesram.wrappers_sky130 as hl_wrappers
 import bluesram.typeclass_wrappers_sky130 as tc_wrappers
+import bluesram.parse_model_dffram as dff_parser
 from functools import reduce
 
 
@@ -109,25 +110,27 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--sram22", action=argparse.BooleanOptionalAction, help="load SRAM22 macros instead of openRAM macros")
+    parser.add_argument("--dffram", action=argparse.BooleanOptionalAction, help="load DFFRAM macros instead of openRAM macros")
     parser.add_argument("macro_dir", type=str, help="Folder containing the memory views")
 
     args = parser.parse_args()
 
-    if args.sram22:
-        print("SRAM22 arguments detected.")
-        print(args.sram22)
-
-    macros = collect_macro_info(args.macro_dir, collect_macro_names(args.macro_dir, args.sram22), args.sram22)
+    macros = None
+    if not args.dffram:
+        macros = collect_macro_info(args.macro_dir, collect_macro_names(args.macro_dir, args.sram22), args.sram22)
+    else:
+        macros = dff_parser.collect_macro_info(os.path.join(args.macro_dir, "model.v"))
 
     for macro in macros:
         print(macro)
 
-    ll_wrappers.create_bvi_wrappers(macros, args.sram22)
-    hl_wrappers.create_wrappers(macros, args.sram22)
-    tc_wrappers.create_wrappers(macros, args.sram22)
+    ll_wrappers.create_bvi_wrappers(macros, args.sram22, args.dffram)
+    hl_wrappers.create_wrappers(macros, args.sram22, args.dffram)
+    tc_wrappers.create_wrappers(macros, args.sram22, args.dffram)
 
     # write vlog sources to makefile
     # get vlog names
-    vlog_files = map(lambda a: a.vlog, macros)
+    dffram_files = ["model.v", "sky130.v", "block_definitions.v"]
+    vlog_files = map(lambda a: a.vlog, macros) if not args.dffram else map(lambda a: os.path.abspath(os.path.join(args.macro_dir, a)), dffram_files)
     vlog_str = reduce(lambda a, b: a+" "+b, vlog_files)
-    open("openram.files" if not args.sram22 else "sram22.files", "w").write("C_FILES += " + vlog_str)
+    open("sram22.files" if args.sram22 else "dffram.files" if args.dffram else "openram.files", "w").write("C_FILES += " + vlog_str)
