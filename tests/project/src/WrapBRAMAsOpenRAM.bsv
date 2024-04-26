@@ -1,6 +1,5 @@
 package WrapBRAMAsOpenRAM;
 
-import MacroDecls::*;
 import OpenRAMIfc::*;
 import Vector::*;
 import ClientServer::*;
