@@ -79,6 +79,9 @@ package TestsMainTest;
         `ifdef BRAMSPBE
             <- mkOpenRamBRAMByteEnSP(bram)
         `endif
+        `ifdef DFFRAM
+            <- mkDFFRAM(guard, unpack(`LATCHED))
+        `endif
         ;
 
 
