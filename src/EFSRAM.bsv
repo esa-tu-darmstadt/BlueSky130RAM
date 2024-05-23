@@ -10,12 +10,18 @@ module mkEFSRAM#(Bool guard_rq_buffer_rs) (OpenRAMIfc#(0, 0, 1, 10, 32, 4));
     // internal
     let ll <- mk_EFSRAM_ll;
 
-    // handling of enable signals for macro
-    Wire#(Bool) got_rq_0 <- mkDWire(False);
+    // data to send
+    Wire#(Bool) ena <- mkDWire(False);
+    Wire#(Bit#(10)) ad <- mkDWire(0);
+    Wire#(Bit#(32)) di <- mkDWire(0);
+    Wire#(Bit#(32)) wmask <- mkDWire(0);
+    Wire#(Bool) we <- mkDWire(True);
+
     // if no request is sent, we must send dummy values to statisfy always_enabled
-    rule dummy_request0 if (!got_rq_0);
-        ll.rw0.ena(False); // active low, disabled
-        ll.rw0.request(0, 0, 0, False); // don't care, has no effect as ena is disabled
+    (*no_implicit_conditions,fire_when_enabled*)
+    rule rq_send;
+        ll.rw0.ena(ena); // active low, disabled
+        ll.rw0.request(ad, di, wmask, we); // don't care, has no effect as ena is disabled
     endrule
 
     // adding guards for reading - only allow result method if result is available
@@ -45,12 +51,17 @@ module mkEFSRAM#(Bool guard_rq_buffer_rs) (OpenRAMIfc#(0, 0, 1, 10, 32, 4));
     rw_loc[0] = (interface RWIfc;
         method Action request(Bit#(10) addr, Bit#(32) din, Bit#(4) mask, Bool write_en)
             if (!guard_rq_buffer_rs || rd_rq_cnt_0[0] < 3); // if guarded, stall when no further requests could be handled without loosing data
-            got_rq_0 <= True; // stall dummy request logic
+            
             // send request
             Vector#(4, Bit#(1)) mask_  = unpack(mask);
             Vector#(4, Bit#(8)) mask_b = map(compose(pack, replicate), mask_);
-            ll.rw0.request(addr, din, pack(mask_b), !write_en);
-            ll.rw0.ena(True);
+
+            ena <= True;
+            ad <= addr;
+            di <= din;
+            wmask <= pack(mask_b);
+            we <= !write_en;
+
             if (!write_en) got_rq_rd_0 <= True; // notify shift register of read request
 
             $display("REQ: ", fshow(addr), " ", fshow(din), " ", fshow(mask), " ", fshow(write_en));
