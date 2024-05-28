@@ -87,7 +87,7 @@ interface EFSRAMLLIfc;
     interface LL_RWIfc#(10, 32, 32) rw0;
 endinterface
 
-import "BVI" EF_SRAM_1024x32 = 
+import "BVI" EF_SRAM_1024x32_wrapper = 
 module mk_EFSRAM_ll (EFSRAMLLIfc);
     Clock dclk0 <- exposeCurrentClock;
 
